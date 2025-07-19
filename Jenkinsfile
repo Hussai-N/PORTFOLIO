@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
-        S3_BUCKET = 'my-portfolio-bucket-for-project'
+        S3_BUCKET = 'my-portfolio-bucket-for-project' // <-- Update with your real bucket
     }
 
     stages {
@@ -26,9 +26,13 @@ pipeline {
 
         stage('Deploy to S3') {
             steps {
-                bat '''
-                aws s3 sync . s3://%S3_BUCKET% --delete
-                '''
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-s3-creds']]) {
+                    bat '''
+                    aws configure set aws_access_key_id %AWS_ACCESS_KEY_ID%
+                    aws configure set aws_secret_access_key %AWS_SECRET_ACCESS_KEY%
+                    aws s3 sync . s3://%S3_BUCKET% --delete
+                    '''
+                }
             }
         }
     }

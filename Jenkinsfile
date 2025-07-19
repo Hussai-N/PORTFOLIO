@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
-        S3_BUCKET = 'my-portfolio-bucket-for-project' // <-- Update with your real bucket
+        S3_BUCKET = 'my-portfolio-bucket-for-project' 
     }
 
     stages {

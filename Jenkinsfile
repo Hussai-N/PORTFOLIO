@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_DEFAULT_REGION = 'ap-south-1'
-        S3_BUCKET = 'my-portfolio-bucket-for-project' // <-- Replace with your actual S3 bucket
+        S3_BUCKET = 'my-portfolio-bucket-for-project'
     }
 
     stages {
@@ -13,31 +13,22 @@ pipeline {
             }
         }
 
-        stage('Install AWS CLI') {
+        stage('Install AWS CLI (Optional)') {
             steps {
-                sh '''
-                if ! command -v aws >/dev/null 2>&1; then
-                    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                    unzip awscliv2.zip
-                    sudo ./aws/install
-                fi
+                bat '''
+                aws --version || (
+                    curl -o awscliv2.zip https://awscli.amazonaws.com/AWSCLIV2.msi
+                    msiexec.exe /i awscliv2.zip /quiet
+                )
                 '''
             }
         }
 
         stage('Deploy to S3') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials-id' // <-- Replace with your Jenkins AWS credentials ID
-                ]]) {
-                    sh '''
-                    aws s3 sync . s3://$S3_BUCKET \
-                        --exclude ".git/*" \
-                        --exclude "Jenkinsfile" \
-                        --delete
-                    '''
-                }
+                bat '''
+                aws s3 sync . s3://%S3_BUCKET% --delete
+                '''
             }
         }
     }
